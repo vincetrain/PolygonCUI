@@ -1,9 +1,9 @@
 package JavaPolygon;
 
 public class Polygon {
-    Point head;
-    Point tail;
-    int sides;
+    private Point head;
+    private Point tail;
+    private int sides;
 
     /**
      * Initializes a new "empty" Polygon instance 
@@ -59,6 +59,100 @@ public class Polygon {
         head = tempPoint;
         tail.setNext(head);
         sides++;
+    }
+
+    /**
+     * Returns the amount of sides in the polygon.
+     * 
+     * @return int value containing the number of sides in the polygon
+     */
+    public int getSides() {
+        return sides;
+    }
+
+    /**
+     * Returns a double value containing the perimeter of the polygon
+     * 
+     * @return double value containing the perimeter of the polygon
+     */
+    public double getPerimeter() {
+        Point currentPoint = head;
+        double perimeter = 0;
+
+        int i = 0;
+        while (i < sides) {
+            Point nextPoint = currentPoint.getNext();
+
+            double lineX = nextPoint.getX() - currentPoint.getX();
+            double lineY = nextPoint.getY() - currentPoint.getY();
+
+            perimeter += Math.sqrt(lineX*lineX + lineY*lineY);
+
+            currentPoint = currentPoint.getNext();
+            i++;
+        }
+
+        return perimeter;
+    }
+
+    /**
+     * Returns a double array representing the dimensions of bounding box of the polygon
+     * <p>
+     * Format: {height, width}
+     * @return double[] containing the dimensions of bounding box of the polygon.
+     */
+    public double[] getBoundingBox() {
+        Point tempPoint = head;
+        
+        double width = 0;
+        double height = 0;
+
+        int i = 0;
+        while (i < sides) {
+            double currentX = Math.abs(tempPoint.getX());
+            double currentY = Math.abs(tempPoint.getY());
+            if (currentX > width) {
+                width = currentX;
+            }
+            if (currentY > height) {
+                height = currentY;
+            }
+            tempPoint = tempPoint.getNext();
+            i++;
+        }
+
+        return new double[] {height, width};
+    }
+
+    /**
+     * Returns an integer array representing the dimensions of bounding box of the polygon
+     * <p>
+     * Format: {height, width}
+     * @return int[] containing the dimensions of bounding box of the polygon.
+     */
+    public int[] getBoundingBoxInt() {
+        Point tempPoint = head;
+        
+        int width = 0;
+        int height = 0;
+
+        int i = 0;
+        while (i < sides) {
+            double currentX = Math.abs(tempPoint.getX());
+            double currentY = Math.abs(tempPoint.getY());
+            if (currentX > width) {
+                // Sets height as truncated currentX + 1 if currentX is greater than truncated int currentX
+                width = currentX > (int) currentX ? (int) currentX +1 : (int) currentX;
+            }
+            if (currentY > height) {
+                // Sets height as truncated currentY + 1 if currentY is greater than truncated int currentY
+                height = currentY > (int) currentY ? (int) currentY +1 : (int) currentY;
+            }
+            tempPoint = tempPoint.getNext();
+            i++;
+        }
+
+        return new int[] {height, width};
     }
 
     public String toString() {
