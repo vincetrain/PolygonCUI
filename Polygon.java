@@ -23,8 +23,8 @@ public class Polygon {
         head = null;
         tail = null;
         sides = 0;
-        for (int i = 0; i < points.length; i++) {
-            this.addPoint(new Point(coordsArr[i][0], coordsArr[i][1]));
+        for (int i = 0; i < coordsArr.length; i++) {
+            this.addPoint(coordsArr[i][0], coordsArr[i][1]);
         }
     }
 
@@ -52,7 +52,7 @@ public class Polygon {
      */
     public void addPoint(double[] coords) {
         Point tempPoint = new Point(coords[0], coords[1]);
-        point.setNext(head);
+        tempPoint.setNext(head);
         if (head == null) {
             tail = tempPoint;
         }
