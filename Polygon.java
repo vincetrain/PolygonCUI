@@ -71,6 +71,25 @@ public class Polygon {
     }
 
     /**
+     * Returns a 2D double array containing all points in the polygon
+     * 
+     * @return  double[][] array containing all points in the polygon
+     */
+    public double[][] getPoints() {
+        double[][] coordsArr = new double[sides][2];
+        Point tempPoint = head;
+
+        int i = 0;
+        while (i < sides) {
+            coordsArr[i] = tempPoint.getTuple();
+            tempPoint = tempPoint.getNext();
+            i++;
+        }
+
+        return coordsArr;
+    }
+
+    /**
      * Returns a double value containing the perimeter of the polygon
      * 
      * @return double value containing the perimeter of the polygon
@@ -104,24 +123,32 @@ public class Polygon {
     public double[] getBoundingBox() {
         Point tempPoint = head;
         
-        double width = 0;
-        double height = 0;
+        double maxwidth = 0;
+        double maxheight = 0;
+        double minwidth = 0;
+        double minheight = 0;
 
         int i = 0;
         while (i < sides) {
             double currentX = Math.abs(tempPoint.getX());
             double currentY = Math.abs(tempPoint.getY());
-            if (currentX > width) {
-                width = currentX;
+            if (currentX > maxwidth) {
+                maxwidth = currentX;
             }
-            if (currentY > height) {
-                height = currentY;
+            else if (currentX < 0 && currentX < minwidth) {
+                minwidth = currentX;
+            }
+            if (currentY > maxheight) {
+                maxheight = currentY;
+            }
+            else if (currentY < 0 && currentY < minheight) {
+                minheight = currentY;
             }
             tempPoint = tempPoint.getNext();
             i++;
         }
 
-        return new double[] {height, width};
+        return new double[] {maxheight + (minheight * -1), maxwidth + (minwidth * -1)};
     }
 
     /**
@@ -133,26 +160,77 @@ public class Polygon {
     public int[] getBoundingBoxInt() {
         Point tempPoint = head;
         
-        int width = 0;
-        int height = 0;
+        int maxwidth = 0;
+        int maxheight = 0;
+        int minwidth = 0;
+        int minheight = 0;
 
         int i = 0;
         while (i < sides) {
-            double currentX = Math.abs(tempPoint.getX());
-            double currentY = Math.abs(tempPoint.getY());
-            if (currentX > width) {
-                // Sets height as truncated currentX + 1 if currentX is greater than truncated int currentX
-                width = currentX > (int) currentX ? (int) currentX +1 : (int) currentX;
+            double currentX = tempPoint.getX();
+            double currentY = tempPoint.getY();
+            if (currentX > maxwidth) {
+                // Sets width as truncated currentX + 1 if currentX is greater than truncated int currentX
+                maxwidth = currentX > (int) currentX ? (int) currentX +1 : (int) currentX;
             }
-            if (currentY > height) {
+            else if (currentX < minwidth) {
+                minwidth = currentX > (int) currentX ? (int) currentX -1 : (int) currentX;
+            }
+            if (currentY > maxheight) {
                 // Sets height as truncated currentY + 1 if currentY is greater than truncated int currentY
-                height = currentY > (int) currentY ? (int) currentY +1 : (int) currentY;
+                maxheight = currentY > (int) currentY ? (int) currentY +1 : (int) currentY;
+            }
+            else if (currentY < minheight) {
+                minheight = currentY > (int) currentY ? (int) currentY -1 : (int) currentY;
             }
             tempPoint = tempPoint.getNext();
             i++;
         }
 
-        return new int[] {height, width};
+        return new int[] {maxwidth + (minwidth*-1), maxheight + (minheight*-1)};
+    }
+
+    /**
+     * Normalizes Polygon by transforming points so that the smallest point will be (0,0)
+     * 
+     * @return Polygon object containing normalized points.
+     */
+    public Polygon normalize() {
+        Polygon newPoly = new Polygon();
+        Point smallestPoint = getSmallestPoint();
+        double newX = smallestPoint.getX() * -1;
+        double newY = smallestPoint.getY() * -1;
+        
+        Point tempPoint = head;
+        int i = 0;
+        while (i < sides) {
+            newPoly.addPoint(tempPoint.getX() + newX, tempPoint.getY() + newY);
+            tempPoint = tempPoint.getNext();
+            i++;
+        }
+
+        return newPoly;
+    }
+
+    /**
+     * Returns the smallest point in the polygon
+     * 
+     * @return Point object containing the smallest point of the polygon
+     */
+    private Point getSmallestPoint() {
+        Point tempPoint = head;
+        Point smallestPoint = tempPoint; 
+
+        int i = 0;
+        while (i< sides) {
+            if (tempPoint.getX() < smallestPoint.getX() && tempPoint.getY() < smallestPoint.getY()) {
+                smallestPoint = tempPoint;
+            }            
+            tempPoint = tempPoint.getNext();
+            i++;
+        }
+
+        return smallestPoint;
     }
 
     public String toString() {
@@ -200,7 +278,7 @@ public class Polygon {
         /**
          * Returns next Point that this current point is pointing to
          * 
-         * @return 
+         * @return Next point
          */
         public Point getNext() {
             return next;
@@ -213,6 +291,15 @@ public class Polygon {
          */
         public void setNext(Point newNext) {
             next = newNext;
+        }
+
+        /**
+         * Returns a double tuple representing the coordinates of the current point
+         * 
+         * @return  double[] containing coordinates of the point
+         */
+        public double[] getTuple() {
+            return new double[] {positionX, positionY};
         }
 
         /**
@@ -242,22 +329,6 @@ public class Polygon {
         public void set(double x, double y) {
             positionX = x;
             positionY = y;
-        }
-    
-        public Point add(Point point) {
-            return new Point(positionX + point.getX(), positionY + point.getY());
-        }
-    
-        public Point add(double amount) {
-            return new Point(positionX + amount, positionY + amount);
-        }
-    
-        public Point subtract(Point point) {
-            return new Point(positionX - point.getX(), positionY - point.getY());
-        }
-    
-        public Point subtract(double amount) {
-            return new Point(positionX - amount, positionY - amount);
         }
     
         public String toString() {
